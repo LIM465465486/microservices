@@ -1,0 +1,5 @@
+### Get request with a header
+GET https://www.thirty48.com/api/order_display/?token=2185CC75&day=2
+Accept: application/json
+
+###
