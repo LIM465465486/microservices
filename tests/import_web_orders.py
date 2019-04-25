@@ -1,23 +1,26 @@
 import requests
 import json
+from config import *
 from auth.sap_auth import SAPAuth
 
-# web_r = requests.get('https://www.thirty48.com/api/order_display/?token=2185CC75&day=15')
-# orders_list = json.loads(web_r.text)
-# print(orders_list)
-
-with open('/home/luis/lim/microservices/tests/web_orders.json') as json_file:
-    data = json.load(json_file)
+web_r = requests.get(web_url + '/order_display/?token=2185CC75&day=15')
+# web_r = requests.get(web_url + '/order_display/?token=2185CC75&order_number=T1904_00016_TBHD')
 orders_list = []
-orders_list = data
+orders_list = json.loads(web_r.text)
+#print(orders_list)
 
-url = 'http://SAPAPI:5000/v1/orders'
+# with open('/home/luis/lim/microservices/tests/web_orders.json') as json_file:
+#     data = json.load(json_file)
+# orders_list = []
+# orders_list = data
+
+url = sap_url + '/v1/orders'
 token = SAPAuth.get_token()
 headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
 data = {"columns": ["NumAtCard"], "params": {"CardCode": {"op": "=", "value": "T481995"}, "DocDate": {"op": ">=", "value": "2019-4-1"}}, "LineColumns": ["LineNum", "ItemCode", "Price", "Quantity"]}
 data = json.dumps(data)
 # print(data)
-r = requests.get(url, data=data, headers=headers, verify=False)
+r = requests.get(url, data=data, headers=headers)
 # print(r.text)
 
 sap_order_list = []
@@ -32,7 +35,7 @@ for sap_ref in sap_order_list:
 
 if orders_list:
     for order in orders_list:
-        if order['order_number'] not in clean_list:
+        if order['order_number'] not in clean_list and order['order_number'] == 'T1904_00016_TBHD':
             print(order['order_number'])
             order_bill_address = {}
             order_ship_address = {}
@@ -231,11 +234,13 @@ if orders_list:
                     print('Item Loop')
             print(sap_order)
             sap_json = json.dumps(sap_order)
-            url = 'http://SAPAPI:5000' + '/v1/orders'
+            url = sap_url + '/v1/orders'
             token = SAPAuth.get_token()
             headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
             r = requests.post(url, sap_json, headers=headers)
-        print('Order Loop')
+            print(r.status_code)
+            print(r.text)
+        # print('Order Loop')
 
 print('End')
 
