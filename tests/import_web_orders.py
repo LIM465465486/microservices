@@ -1,13 +1,14 @@
 import requests
 import json
+from decimal import Decimal
 from config import *
 from auth.sap_auth import SAPAuth
 
-web_r = requests.get(web_url + '/order_display/?token=2185CC75&day=15')
+web_r = requests.get(web_url + '/order_display/?token=2185CC75&day=5')
 # web_r = requests.get(web_url + '/order_display/?token=2185CC75&order_number=T1904_00016_TBHD')
 orders_list = []
 orders_list = json.loads(web_r.text)
-#print(orders_list)
+# print(orders_list)
 
 # with open('/home/luis/lim/microservices/tests/web_orders.json') as json_file:
 #     data = json.load(json_file)
@@ -35,11 +36,14 @@ for sap_ref in sap_order_list:
 
 if orders_list:
     for order in orders_list:
-        if order['order_number'] not in clean_list and order['order_number'] == 'T1904_00016_TBHD':
+        if order['order_number'] not in clean_list and order['order_status'] == 'ship':
+                #and order['order_number'] == 'T1904_00030_JNSZ':
             print(order['order_number'])
             order_bill_address = {}
             order_ship_address = {}
             order_items_list = []
+
+            tax_code = '0' if order['tax'] == '0' else '0'
 
             sap_order = {}
             sap_order['Lines'] = []
@@ -55,7 +59,8 @@ if orders_list:
             # sap_order[''] = order['coupon_discount']
             # sap_order[''] = order['product_total']
             # sap_order[''] = order['shipping_charge']
-            # sap_order[''] = order['tax']
+            # print(order['tax'])
+            # sap_order['VatPercent'] = 7.00
             # sap_order['DocTotal'] = order['grand_total']
             sap_order['Comments'] = order['note']
             # sap_order[''] = order['tracking_number']
@@ -66,11 +71,12 @@ if orders_list:
 
             order_item = {}
             for order_hold in order_items_list:
+                list_index = 0
                 for key, val in order_hold.items():
                     # print(val)
                     order_item = val
                     # print(order_item['model'], order_item['product_type'])
-                    list_index = 0
+
                     if order_item['product_type'] == 'pack':
                         order_item_size = ''
                         if order_item['size'] == 'xs':
@@ -97,7 +103,8 @@ if orders_list:
                                     'ItemCode': 'RU' + order_item_size + order_pack['model'][2:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -110,7 +117,8 @@ if orders_list:
                                     'ItemCode': 'RUL' + order_item_size + order_pack['model'][3:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -123,7 +131,9 @@ if orders_list:
                                     'ItemCode': 'RUS' + order_item_size + order_pack['model'][3:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -136,7 +146,9 @@ if orders_list:
                                     'ItemCode': 'CRU' + order_item_size + order_pack['model'][3:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -149,7 +161,9 @@ if orders_list:
                                     'ItemCode': 'CY' + order_item_size + order_pack['model'][2:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -162,7 +176,9 @@ if orders_list:
                                     'ItemCode': 'CY' + order_item_size + order_pack['model'][2:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -175,7 +191,9 @@ if orders_list:
                                     'ItemCode': 'HK' + order_item_size + order_pack['model'][2:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -188,7 +206,9 @@ if orders_list:
                                     'ItemCode': 'HKL' + order_item_size + order_pack['model'][3:],
                                     'Quantity': order_item['quantity'],
                                     'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
-                                    'TaxCode': '0',
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -209,6 +229,76 @@ if orders_list:
                             elif order_item['size'] == 'xxl':
                                 order_item_size = '5'
 
+                            if order_item['model'] == 'CPBAR':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'CP' + order_item_size + order_item['model'][2:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'CPBLB':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'CP' + order_item_size + order_item['model'][2:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'CRUBKG':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'CRU' + order_item_size + order_item['model'][3:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'CRUPKG':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'CRU' + order_item_size + order_item['model'][3:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'HKLBWP':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'HKL' + order_item_size + order_item['model'][3:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
                             if order_item['model'] == 'RUSBKG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
@@ -216,7 +306,51 @@ if orders_list:
                                     'ItemCode': 'RUS' + order_item_size + order_item['model'][3:],
                                     'Quantity': order_item['quantity'],
                                     'Price': order_item['unit_price'],
-                                    'TaxCode': '0',
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'RUSGNG':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'RUS' + order_item_size + order_item['model'][3:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'RUSPKG':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'RUS' + order_item_size + order_item['model'][3:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'RUSPRG':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'RUS' + order_item_size + order_item['model'][3:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
@@ -226,12 +360,22 @@ if orders_list:
                                 'ItemCode': order_item['model'],
                                 'Quantity': order_item['quantity'],
                                 'Price': order_item['unit_price'],
-                                'TaxCode': '0',
+                                'TaxCode': tax_code,
                                 'DiscountPercent': 0
                             })
                             list_index = list_index + 1
-
                     print('Item Loop')
+
+                if order['tax'] != '0':
+                    sap_order['Lines'].insert(list_index, {
+                        'ItemCode': 'Tax',
+                        'Quantity': 1,
+                        'Price': order['tax'],
+                        'TaxCode': tax_code,
+                        'DiscountPercent': 0
+                    })
+                    list_index = list_index + 1
+
             print(sap_order)
             sap_json = json.dumps(sap_order)
             url = sap_url + '/v1/orders'
