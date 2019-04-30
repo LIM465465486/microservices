@@ -4,16 +4,16 @@ from decimal import Decimal
 from config import *
 from auth.sap_auth import SAPAuth
 
-web_r = requests.get(web_url + '/order_display/?token=2185CC75&day=5')
+# web_r = requests.get(web_url + '/order_display/?token=2185CC75&day=5')
 # web_r = requests.get(web_url + '/order_display/?token=2185CC75&order_number=T1904_00016_TBHD')
-orders_list = []
-orders_list = json.loads(web_r.text)
+# orders_list = []
+# orders_list = json.loads(web_r.text)
 # print(orders_list)
 
-# with open('/home/luis/lim/microservices/tests/web_orders.json') as json_file:
-#     data = json.load(json_file)
-# orders_list = []
-# orders_list = data
+with open('/home/luis/lim/microservices/tests/web_orders.json') as json_file:
+    data = json.load(json_file)
+orders_list = []
+orders_list = data
 
 url = sap_url + '/v1/orders'
 token = SAPAuth.get_token()
@@ -244,6 +244,20 @@ if orders_list:
                                 list_index = list_index + 1
 
                             if order_item['model'] == 'CPBLB':
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'CP' + order_item_size + order_item['model'][2:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
+                            if order_item['model'] == 'CPGNG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
