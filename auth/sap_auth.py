@@ -1,12 +1,12 @@
 import requests
 import simplejson
+from config import *
 
 
 class SAPAuth:
     @staticmethod
     def get_token():
-        url = 'https://thirty48.mynetgear.com/auth'
-        url = 'http://SAPAPI:5000/auth'
+        url = sap_url + '/auth'
         headers = {"content-type": "application/json"}
         data = simplejson.dumps({"username": "user1", "password": "Tsurhhv8374heuvr4!"})
         try:

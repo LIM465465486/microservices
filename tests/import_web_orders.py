@@ -4,17 +4,21 @@ from decimal import Decimal
 from config import *
 from auth.sap_auth import SAPAuth
 
-# web_r = requests.get(web_url + '/order_display/?token=2185CC75&day=5')
+print('Begin')
+print('Getting web orders')
+web_r = requests.get(web_url + '/order_display/?token=2185CC75&day=3')
 # web_r = requests.get(web_url + '/order_display/?token=2185CC75&order_number=T1904_00016_TBHD')
-# orders_list = []
-# orders_list = json.loads(web_r.text)
+orders_list = []
+orders_list = json.loads(web_r.text)
 # print(orders_list)
 
-with open('/home/luis/lim/microservices/tests/web_orders.json') as json_file:
-    data = json.load(json_file)
-orders_list = []
-orders_list = data
 
+# with open('/home/luis/lim/microservices/tests/web_orders.json') as json_file:
+#     data = json.load(json_file)
+# orders_list = []
+# orders_list = data
+
+print('Getting SAP orders')
 url = sap_url + '/v1/orders'
 token = SAPAuth.get_token()
 headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
@@ -34,11 +38,13 @@ for sap_ref in sap_order_list:
     # print(sap_ref['NumAtCard'])
     clean_list.append(sap_ref['NumAtCard'])
 
+
 if orders_list:
+    print('Checking for new orders')
     for order in orders_list:
         if order['order_number'] not in clean_list and order['order_status'] == 'ship':
-                #and order['order_number'] == 'T1904_00030_JNSZ':
-            print(order['order_number'])
+            # and order['order_number'] == 'T1904_00030_JNSZ':
+            print('New order found: ' + order['order_number'])
             order_bill_address = {}
             order_ship_address = {}
             order_items_list = []
@@ -229,7 +235,8 @@ if orders_list:
                             elif order_item['size'] == 'xxl':
                                 order_item_size = '5'
 
-                            if order_item['model'] == 'CPBAR':
+                            if order_item['model'] == 'CPBAR' or order_item['model'] == 'CPBLB' or \
+                                    order_item['model'] == 'CPGBA' or order_item['model'] == 'CPGNG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
@@ -243,49 +250,7 @@ if orders_list:
                                 })
                                 list_index = list_index + 1
 
-                            if order_item['model'] == 'CPBLB':
-                                print(order_item['model'], order_item['size'])
-                                print(list_index)
-                                sap_order['Lines'].insert(list_index, {
-                                    'ItemCode': 'CP' + order_item_size + order_item['model'][2:],
-                                    'Quantity': order_item['quantity'],
-                                    'Price': order_item['unit_price'],
-                                    'TaxLiable': 0,
-                                    'TaxCode': tax_code,
-                                    # 'TaxPercentagePerRow': tax_percent,
-                                    'DiscountPercent': 0
-                                })
-                                list_index = list_index + 1
-
-                            if order_item['model'] == 'CPGNG':
-                                print(order_item['model'], order_item['size'])
-                                print(list_index)
-                                sap_order['Lines'].insert(list_index, {
-                                    'ItemCode': 'CP' + order_item_size + order_item['model'][2:],
-                                    'Quantity': order_item['quantity'],
-                                    'Price': order_item['unit_price'],
-                                    'TaxLiable': 0,
-                                    'TaxCode': tax_code,
-                                    # 'TaxPercentagePerRow': tax_percent,
-                                    'DiscountPercent': 0
-                                })
-                                list_index = list_index + 1
-
-                            if order_item['model'] == 'CRUBKG':
-                                print(order_item['model'], order_item['size'])
-                                print(list_index)
-                                sap_order['Lines'].insert(list_index, {
-                                    'ItemCode': 'CRU' + order_item_size + order_item['model'][3:],
-                                    'Quantity': order_item['quantity'],
-                                    'Price': order_item['unit_price'],
-                                    'TaxLiable': 0,
-                                    'TaxCode': tax_code,
-                                    # 'TaxPercentagePerRow': tax_percent,
-                                    'DiscountPercent': 0
-                                })
-                                list_index = list_index + 1
-
-                            if order_item['model'] == 'CRUPKG':
+                            if order_item['model'] == 'CRUBKG' or order_item['model'] == 'CRUPKG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
@@ -313,7 +278,8 @@ if orders_list:
                                 })
                                 list_index = list_index + 1
 
-                            if order_item['model'] == 'RUSBKG':
+                            if order_item['model'] == 'RUSBKG' or order_item['model'] == 'RUSGNG' \
+                                    or order_item['model'] == 'RUSPKG' or order_item['model'] == 'RUSPRG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
@@ -327,39 +293,11 @@ if orders_list:
                                 })
                                 list_index = list_index + 1
 
-                            if order_item['model'] == 'RUSGNG':
+                            if order_item['model'] == 'FCGRG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
-                                    'ItemCode': 'RUS' + order_item_size + order_item['model'][3:],
-                                    'Quantity': order_item['quantity'],
-                                    'Price': order_item['unit_price'],
-                                    'TaxLiable': 0,
-                                    'TaxCode': tax_code,
-                                    # 'TaxPercentagePerRow': tax_percent,
-                                    'DiscountPercent': 0
-                                })
-                                list_index = list_index + 1
-
-                            if order_item['model'] == 'RUSPKG':
-                                print(order_item['model'], order_item['size'])
-                                print(list_index)
-                                sap_order['Lines'].insert(list_index, {
-                                    'ItemCode': 'RUS' + order_item_size + order_item['model'][3:],
-                                    'Quantity': order_item['quantity'],
-                                    'Price': order_item['unit_price'],
-                                    'TaxLiable': 0,
-                                    'TaxCode': tax_code,
-                                    # 'TaxPercentagePerRow': tax_percent,
-                                    'DiscountPercent': 0
-                                })
-                                list_index = list_index + 1
-
-                            if order_item['model'] == 'RUSPRG':
-                                print(order_item['model'], order_item['size'])
-                                print(list_index)
-                                sap_order['Lines'].insert(list_index, {
-                                    'ItemCode': 'RUS' + order_item_size + order_item['model'][3:],
+                                    'ItemCode': 'FC' + order_item_size + order_item['model'][2:],
                                     'Quantity': order_item['quantity'],
                                     'Price': order_item['unit_price'],
                                     'TaxLiable': 0,
@@ -399,6 +337,7 @@ if orders_list:
             print(r.status_code)
             print(r.text)
         # print('Order Loop')
+else:
+    print('Web API offline or no new orders')
 
 print('End')
-
