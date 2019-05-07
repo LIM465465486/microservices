@@ -250,7 +250,8 @@ if orders_list:
                                 })
                                 list_index = list_index + 1
 
-                            if order_item['model'] == 'CRUBKG' or order_item['model'] == 'CRUPKG':
+                            if order_item['model'] == 'CRUBKG' or order_item['model'] == 'CRUPKG' \
+                                    or order_item['model'] == 'CRUBLW' or order_item['model'] == 'CRUPRG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
@@ -279,7 +280,8 @@ if orders_list:
                                 list_index = list_index + 1
 
                             if order_item['model'] == 'RUSBKG' or order_item['model'] == 'RUSGNG' \
-                                    or order_item['model'] == 'RUSPKG' or order_item['model'] == 'RUSPRG':
+                                    or order_item['model'] == 'RUSPKG' or order_item['model'] == 'RUSORG' \
+                                    or order_item['model'] == 'RUSPRG':
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
