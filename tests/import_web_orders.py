@@ -280,6 +280,20 @@ if orders_list:
                                 })
                                 list_index = list_index + 1
 
+                            if order_item['model'] in ('CYBAG', 'CYBAR', 'CYBAGN', 'CYGRW', 'CYORW', 'CYBLW'):
+                                print(order_item['model'], order_item['size'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'FC' + order_item_size + order_item['model'][2:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': order_item['unit_price'],
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
                             if order_item['model'] == 'RUFPKG' or order_item['model'] == 'RUORG' \
                                     or order_item['model'] == 'RUGNG':
                                 print(order_item['model'], order_item['size'])
