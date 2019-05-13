@@ -189,6 +189,21 @@ if orders_list:
                                 })
                                 list_index = list_index + 1
 
+                        if order_item['model'] == 'FC2PK':
+                            for order_pack in order_packs:
+                                print(order_item['model'], order_item['size'], order_pack['model'])
+                                print(list_index)
+                                sap_order['Lines'].insert(list_index, {
+                                    'ItemCode': 'FC' + order_item_size + order_pack['model'][2:],
+                                    'Quantity': order_item['quantity'],
+                                    'Price': round((float(order_item['unit_price']) / float(order_item['pack_q'])), 2),
+                                    'TaxLiable': 0,
+                                    'TaxCode': tax_code,
+                                    # 'TaxPercentagePerRow': tax_percent,
+                                    'DiscountPercent': 0
+                                })
+                                list_index = list_index + 1
+
                         if order_item['model'] == 'HK3PK':
                             for order_pack in order_packs:
                                 print(order_item['model'], order_item['size'], order_pack['model'])
@@ -310,7 +325,7 @@ if orders_list:
                                 })
                                 list_index = list_index + 1
 
-                            if order_item['model'] == 'FCGRG':
+                            if order_item['model'] in ('FCBKG', 'FCBLW', 'FCGRG', 'FCPKG'):
                                 print(order_item['model'], order_item['size'])
                                 print(list_index)
                                 sap_order['Lines'].insert(list_index, {
@@ -323,7 +338,6 @@ if orders_list:
                                     'DiscountPercent': 0
                                 })
                                 list_index = list_index + 1
-
                         else:
                             sap_order['Lines'].insert(list_index, {
                                 'ItemCode': order_item['model'],
