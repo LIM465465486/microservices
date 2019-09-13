@@ -42,6 +42,10 @@ def sync_inventory():
 
     sap_items = get_sap_items()
 
+    if not sap_items:
+        print('Error: No response from SAP')
+        return
+
     for sap_item in sap_items:
         item_code = sap_item['ItemCode']
         quantity = int(sap_item['Warehouses'][0]['Available'])
@@ -86,20 +90,21 @@ def get_sap_items():
     print('Getting SAP products')
     url = sap_url + '/v1/items'
     token = SAPAuth.get_token()
-    headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
-    data = {"columns": ["ItemCode"],
-            "params": {}
-            }
-    data = json.dumps(data)
-    # print(data)
-    r = requests.get(url, data=data, headers=headers)
-    # print(r.text)
+    if token:
+        headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
+        data = {"columns": ["ItemCode"],
+                "params": {}
+                }
+        data = json.dumps(data)
+        # print(data)
+        r = requests.get(url, data=data, headers=headers)
+        # print(r.text)
 
-    sap_items = []
-    sap_items = json.loads(r.text)
-    # print(type(sap_products_list))
-    # print(sap_products_list)
-    return sap_items
+        sap_items = []
+        sap_items = json.loads(r.text)
+        # print(type(sap_products_list))
+        # print(sap_products_list)
+        return sap_items
 
 
 def export_dict(file_name, header, dict_data):
