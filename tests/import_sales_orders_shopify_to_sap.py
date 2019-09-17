@@ -17,10 +17,10 @@ def import_sales_orders():
 
     shop_orders = []
     sap_orders = []
-    # since_id = get_sap_since_id()
+    since_id = get_sap_since_id()
     # Get the current shop
-    # orders = get_all_resources(shopify.Order, since_id=since_id, status='any')
-    orders = get_all_resources(shopify.Order, ids=1418462756967, status='any')
+    orders = get_all_resources(shopify.Order, since_id=since_id, status='any')
+    # orders = get_all_resources(shopify.Order, ids=1418462756967, status='any')
 
     for order in orders:
         order_attributes = {}
