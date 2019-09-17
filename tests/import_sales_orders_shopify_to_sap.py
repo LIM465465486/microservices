@@ -17,9 +17,10 @@ def import_sales_orders():
 
     shop_orders = []
     sap_orders = []
-    since_id = get_sap_since_id()
+    # since_id = get_sap_since_id()
     # Get the current shop
-    orders = get_all_resources(shopify.Order, since_id=since_id, status='any')
+    # orders = get_all_resources(shopify.Order, since_id=since_id, status='any')
+    orders = get_all_resources(shopify.Order, ids=1418462756967, status='any')
 
     for order in orders:
         order_attributes = {}
@@ -35,6 +36,7 @@ def import_sales_orders():
 
             sap_order = {}
             sap_order['Lines'] = []
+            sap_order['Expenses'] = []
 
             sap_order['CardCode'] = 'T481995'
             # sap_order['CardName'] = order['member_name']
@@ -82,6 +84,18 @@ def import_sales_orders():
             #         'DiscountPercent': 0
             #     })
             #     list_index = list_index + 1
+
+            list_index = 0
+            shipping_lines = order_attributes['shipping_lines']
+            for shipping_line in shipping_lines:
+                shipping_line_attributes = shipping_line.attributes
+                sap_order['Expenses'].insert(list_index, {
+                    'ExpenseCode': 3,
+                    'LineTotal': shipping_line_attributes['price'],
+                    'TaxCode': tax_code
+                })
+                list_index = list_index + 1
+                print('Shipping Loop')
 
             print(sap_order)
             sap_json = json.dumps(sap_order)
