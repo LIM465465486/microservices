@@ -20,7 +20,7 @@ def import_sales_orders():
     since_id = get_sap_since_id()
     # Get the current shop
     orders = get_all_resources(shopify.Order, since_id=since_id, status='any')
-    # orders = get_all_resources(shopify.Order, ids=1418462756967, status='any')
+    # orders = get_all_resources(shopify.Order, ids=1419232018535, status='any')
 
     for order in orders:
         order_attributes = {}
@@ -75,27 +75,29 @@ def import_sales_orders():
                 list_index = list_index + 1
                 print('Item Loop')
 
-            # if order['tax'] != '0':
-            #     sap_order['Lines'].insert(list_index, {
-            #         'ItemCode': 'Tax',
-            #         'Quantity': 1,
-            #         'Price': order['tax'],
-            #         'TaxCode': tax_code,
-            #         'DiscountPercent': 0
-            #     })
-            #     list_index = list_index + 1
+            if order_attributes['total_tax'] != '0.00':
+                sap_order['Lines'].insert(list_index, {
+                    'ItemCode': 'Tax',
+                    'Quantity': 1,
+                    'Price': order_attributes['total_tax'],
+                    'TaxCode': tax_code,
+                    'DiscountPercent': 0
+                })
+                list_index = list_index + 1
+                print('Tax Loop')
 
             list_index = 0
             shipping_lines = order_attributes['shipping_lines']
             for shipping_line in shipping_lines:
                 shipping_line_attributes = shipping_line.attributes
-                sap_order['Expenses'].insert(list_index, {
-                    'ExpenseCode': 3,
-                    'LineTotal': shipping_line_attributes['price'],
-                    'TaxCode': tax_code
-                })
-                list_index = list_index + 1
-                print('Shipping Loop')
+                if shipping_line_attributes['price'] != '0.00':
+                    sap_order['Expenses'].insert(list_index, {
+                        'ExpenseCode': 3,
+                        'LineTotal': shipping_line_attributes['price'],
+                        'TaxCode': tax_code
+                    })
+                    list_index = list_index + 1
+                    print('Shipping Loop')
 
             print(sap_order)
             sap_json = json.dumps(sap_order)
@@ -104,8 +106,8 @@ def import_sales_orders():
             if token:
                 headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
                 r = requests.post(url, sap_json, headers=headers)
-                print(r.status_code)
-                print(r.text)
+                # print(r.status_code)
+                # print(r.text)
         # print('Order Loop')
     print('A')
 
