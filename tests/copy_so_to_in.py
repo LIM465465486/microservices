@@ -26,6 +26,7 @@ if sap_order_list:
     for order in sap_order_list:
         sap_invoice = {}
         sap_invoice['Lines'] = []
+        sap_invoice['Expenses'] = []
 
         # print(order['order_number'])
         sap_invoice['CardCode'] = order['CardCode']
