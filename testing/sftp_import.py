@@ -252,4 +252,4 @@ def create_sap_doc(sap_package, endpoint):
 
 if __name__ == '__main__':
     import_files()
-    # build_sap_doc('TaosFootwear_Scans_20191108135832.csv', './sftp/in/wip/TaosFootwear_Scans_20191108135832.csv')
+    # build_seap_doc('TaosFootwear_Scans_20191108135832.csv', './sftp/in/wip/TaosFootwear_Scans_20191108135832.csv')
