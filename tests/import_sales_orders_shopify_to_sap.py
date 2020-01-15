@@ -28,7 +28,7 @@ def import_sales_orders():
     # orders = get_all_resources(shopify.Order, since_id=since_id, status='any')
     # orders = get_all_resources(shopify.Order, ids=1419232018535, status='any')
     orders = get_all_resources(shopify.Order, updated_at_min=lookup_datetime, status='any')
-    sap_lookup_date = date.today() - timedelta(days=15)
+    sap_lookup_date = date.today() - timedelta(days=90)
     sap_lookup_date = sap_lookup_date.strftime('%Y-%m-%d')
     shopify_order_ids = get_sap_orders_sync(sap_lookup_date)
 
