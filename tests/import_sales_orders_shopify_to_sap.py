@@ -29,16 +29,21 @@ def import_sales_orders():
     # orders = get_all_resources(shopify.Order, ids=1419232018535, status='any')
     orders = get_all_resources(shopify.Order, updated_at_min=lookup_datetime, status='any')
     sap_lookup_date = date.today() - timedelta(days=90)
-    sap_lookup_date = sap_lookup_date.strftime('%Y-%m-%d')
-    shopify_order_ids = get_sap_orders_sync(sap_lookup_date)
+    shopify_order_ids = get_sap_orders_sync(sap_lookup_date.strftime('%Y-%m-%d'))
 
     if orders and shopify_order_ids:
 
         for order in orders:
             order_attributes = {}
             order_attributes = order.attributes
+            order_date = ''
+            order_date = order_attributes['created_at'][:10]
+            order_date = datetime.strptime(order_date,'%Y-%m-%d').date()
 
-            if order_attributes['closed_at'] and order_attributes['fulfillment_status'] == 'fulfilled' and order_attributes['id'] not in shopify_order_ids:
+            if order_attributes['closed_at']\
+                    and order_attributes['fulfillment_status'] == 'fulfilled'\
+                    and order_date <= sap_lookup_date\
+                    and order_attributes['id'] not in shopify_order_ids:
                 print('New order found, order id: ' + str(order_attributes['id']))
                 order_bill_address = {}
                 order_ship_address = {}
