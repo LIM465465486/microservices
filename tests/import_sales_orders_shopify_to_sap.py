@@ -18,37 +18,30 @@ def import_sales_orders():
     shopify.ShopifyResource.set_site(shop_url)
 
     shop_orders = []
-    sap_orders = []
-    # since_id = get_sap_since_id()
 
+    # Get recent Shopify orders
     lookup_datetime = timezone('US/Pacific').localize(datetime.now() - timedelta(days=5)).replace(microsecond=0)
     lookup_datetime = lookup_datetime.isoformat()
+    shop_orders = get_all_resources(shopify.Order, updated_at_min=lookup_datetime, status='any')
 
-    # Get the current shop
-    # orders = get_all_resources(shopify.Order, since_id=since_id, status='any')
-    # orders = get_all_resources(shopify.Order, ids=1419232018535, status='any')
-    orders = get_all_resources(shopify.Order, updated_at_min=lookup_datetime, status='any')
-    sap_lookup_date = date.today() - timedelta(days=90)
-    shopify_order_ids = get_sap_orders_sync(sap_lookup_date.strftime('%Y-%m-%d'))
-
-    if orders and shopify_order_ids:
-
-        for order in orders:
+    if shop_orders:
+        for order in shop_orders:
             order_attributes = {}
-            order_attributes = order.attributes
+            sap_error = False
+            shop_id = ''
             order_date = ''
-            order_date = order_attributes['created_at'][:10]
-            order_date = datetime.strptime(order_date,'%Y-%m-%d').date()
 
-            if order_attributes['closed_at']\
-                    and order_attributes['fulfillment_status'] == 'fulfilled'\
-                    and order_date <= sap_lookup_date\
-                    and order_attributes['id'] not in shopify_order_ids:
-                print('New order found, order id: ' + str(order_attributes['id']))
+            order_attributes = order.attributes
+            shop_id = str(order_attributes['id'])
+            sap_error, sap_fk = IsImported(shop_id)
+                  
+            if sap_error is False and sap_fk is False and order_attributes['closed_at'] and order_attributes['fulfillment_status'] == 'fulfilled':
+                print('New order found, order id: ' + shop_id)
+                order_date = order_attributes['created_at'][:10]
+                order_date = datetime.strptime(order_date, '%Y-%m-%d').date()
                 order_bill_address = {}
                 order_ship_address = {}
                 order_items_list = []
-
                 tax_code = '0'
 
                 sap_order = {}
@@ -139,31 +132,26 @@ def get_all_resources(resource, **kwargs):
     return resources
 
 
-def get_sap_since_id():
-    print('Getting Shopify IDs from SAP')
-    url = sap_url + '/v1/orders'
+def IsImported(shop_id):
+    print('Checking if Shopify order is imported')
+    sap_error = False
+    is_imported = False
+    url = sap_url + '/v1/orders?num=1'
     token = SAPAuth.get_token()
     if token:
         headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
         data = {"columns": ["PickRmrk"],
-                "params": {"CardCode": {"op": "=", "value": "T481995"}, "DocDate": {"op": ">=", "value": "2019-8-15"}},
+                "params": {"CardCode": {"op": "=", "value": "T481995"}, "PickRmrk": {"op": "=", "value": shop_id}},
                 "LineColumns": ["LineNum", "ItemCode", "Price", "Quantity"]}
         data = json.dumps(data)
         # print(data)
         r = requests.get(url, data=data, headers=headers)
 
-        if r.status_code == 200:
+        if r.status_code == 200 and r.text:
             # print(r.text)
+            is_imported = True
 
-            sap_orders = []
-            shopify_order_ids = []
-            sap_orders = r.json()
-            for sap_order in sap_orders:
-                if sap_order['PickRmrk']:
-                    shopify_order_ids.append(int(sap_order['PickRmrk']))
-            since_id = max(shopify_order_ids)
-
-            return since_id
+        return sap_error, is_imported
 
 
 def get_sap_orders_sync(lookup_date):
@@ -190,6 +178,7 @@ def get_sap_orders_sync(lookup_date):
                     shopify_order_ids.append(int(sap_order['PickRmrk']))
 
             return shopify_order_ids
+
 
 if __name__ == '__main__':
     import_sales_orders()
