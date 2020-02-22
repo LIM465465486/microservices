@@ -136,6 +136,8 @@ def IsImported(shop_id):
     print('Checking if Shopify order is imported')
     sap_error = False
     is_imported = False
+    order_located = ''
+    
     url = sap_url + '/v1/orders?num=1'
     token = SAPAuth.get_token()
     if token:
@@ -147,9 +149,11 @@ def IsImported(shop_id):
         # print(data)
         r = requests.get(url, data=data, headers=headers)
 
-        if r.status_code == 200 and r.text:
+        if r.status_code == 200:
             # print(r.text)
-            is_imported = True
+            order_located = r.json()
+            if order_located:
+                is_imported = True
 
         return sap_error, is_imported
 
