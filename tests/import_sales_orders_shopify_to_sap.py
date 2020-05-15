@@ -9,12 +9,12 @@ import shopify
 
 
 def import_sales_orders():
-    API_KEY = '6be780b4e74d0b0c7fa1010878f652e0'
-    PASSWORD = '4fcf453158a2c18929ef92ce4cb8c4f0'
-    API_VERSION = '2019-07'
+    api_key = '6be780b4e74d0b0c7fa1010878f652e0'
+    api_password = '4fcf453158a2c18929ef92ce4cb8c4f0'
+    api_version = '2019-07'
     shop_url = "https://thirty-48.myshopify.com/admin"
-    shopify.ShopifyResource.set_user(API_KEY)
-    shopify.ShopifyResource.set_password(PASSWORD)
+    shopify.ShopifyResource.set_user(api_key)
+    shopify.ShopifyResource.set_password(api_password)
     shopify.ShopifyResource.set_site(shop_url)
 
     shop_orders = []
