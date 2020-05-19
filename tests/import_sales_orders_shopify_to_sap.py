@@ -124,8 +124,7 @@ def import_sales_orders():
                 r = requests.post(url, sap_json, headers=headers)
                 print(r.status_code)
                 print('Line Loop')
-        # print('Order Loop')
-        print('A')
+        print('Order Loop')
 
 
 def get_all_resources(resource, **kwargs):
