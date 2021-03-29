@@ -144,7 +144,7 @@ def get_sap_since_id():
     if token:
         headers = {'authorization': 'JWT ' + token, 'content-type': 'application/json'}
         data = {"columns": ["PickRmrk"],
-                "params": {"CardCode": {"op": "=", "value": "T481995"}, "DocDate": {"op": ">=", "value": "2020-4-1"}},
+                "params": {"CardCode": {"op": "=", "value": "T481995"}, "DocDate": {"op": ">=", "value": "2021-1-1"}},
                 "LineColumns": ["LineNum", "ItemCode", "Price", "Quantity"]}
         data = json.dumps(data)
         # print(data)
